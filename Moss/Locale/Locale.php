@@ -1,5 +1,5 @@
 <?php
-namespace moss\locale;
+namespace Moss\Locale;
 
 class Locale
 {
@@ -23,9 +23,15 @@ class Locale
 
     public function set(array $dict, $locale)
     {
-        foreach ($dict as $key => $word) {
-            $this->dict[$locale][$key] = $word;
+        if(!isset($this->dict[$locale])) {
+            $this->dict[$locale] = array();
         }
+
+        foreach ($dict as $key => $word) {
+            $this->dict[$locale][$key] = (string) $word;
+        }
+
+        return $this;
     }
 
     public function get($word, $locale = null)
@@ -38,9 +44,7 @@ class Locale
             return $word;
         }
 
-        $word = $this->dict[$locale][$word];
-
-        return $word;
+        return $this->dict[$locale][$word];
     }
 
     protected function choose($message, $number, $locale)
@@ -278,15 +282,16 @@ class Locale
         return strtr($this->get($word, $locale), $parameters);
     }
 
-    public function transChoice($id, $number, array $parameters = array(), $locale = null)
+    public function transChoice($word, $number, array $parameters = array(), $locale = null)
     {
         if ($locale === null) {
             $locale = $this->locale;
         }
 
-        $id = (string) $id;
+        $parameters['%count%'] = $number;
+        $word = (string) $word;
 
-        return strtr($this->choose($this->get($id, $locale), (int) $number, $locale), $parameters);
+        return strtr($this->choose($this->get($word, $locale), (int) $number, $locale), $parameters);
     }
 
 
