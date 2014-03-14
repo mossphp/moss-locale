@@ -1,17 +1,45 @@
 <?php
+
+/*
+ * This file is part of the Storage package
+ *
+ * (c) Michal Wachowski <wachowski.michal@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Moss\Locale;
 
-class Locale
+/**
+ * Locale
+ *
+ * @package Moss\Locale
+ */
+class Locale implements LocaleInterface
 {
 
     protected $intervalRegexp = '({\s*(\-?\d+(\.\d+)?[\s*,\s*\-?\d+(\.\d+)?]*)\s*})|(?P<left_delimiter>[\[\]])\s*(?P<left>-Inf|\-?\d+(\.\d+)?)\s*,\s*(?P<right>\+?Inf|\-?\d+(\.\d+)?)\s*(?P<right_delimiter>[\[\]])';
     protected $dict = array();
     protected $locale;
 
-    public function __construct($defaultLocale) {
+    /**
+     * Constructor
+     *
+     * @param string $defaultLocale
+     */
+    public function __construct($defaultLocale)
+    {
         $this->locale = $defaultLocale;
     }
 
+    /**
+     * Sets default locale
+     *
+     * @param null|string $locale
+     *
+     * @return string
+     */
     public function locale($locale = null)
     {
         if ($locale !== null) {
@@ -21,9 +49,17 @@ class Locale
         return $this->locale;
     }
 
+    /**
+     * Sets/adds words for locale
+     *
+     * @param array  $dict
+     * @param string $locale
+     *
+     * @return $this
+     */
     public function set(array $dict, $locale)
     {
-        if(!isset($this->dict[$locale])) {
+        if (!isset($this->dict[$locale])) {
             $this->dict[$locale] = array();
         }
 
@@ -34,6 +70,14 @@ class Locale
         return $this;
     }
 
+    /**
+     * Retrieves word for locale
+     *
+     * @param string      $word
+     * @param null|string $locale
+     *
+     * @return string
+     */
     public function get($word, $locale = null)
     {
         if ($locale === null) {
@@ -273,6 +317,15 @@ class Locale
         }
     }
 
+    /**
+     * Returns localized message
+     *
+     * @param string $word
+     * @param array  $parameters
+     * @param string $locale
+     *
+     * @return string
+     */
     public function trans($word, array $parameters = array(), $locale = null)
     {
         if ($locale === null) {
@@ -282,16 +335,28 @@ class Locale
         return strtr($this->get($word, $locale), $parameters);
     }
 
-    public function transChoice($word, $number, array $parameters = array(), $locale = null)
+    /**
+     * Returns plural localized message
+     * Input message eg.:
+     * {0} There are no apples|{1} There is one apple|]1,19] There are %count% apples|[20,Inf] There are many apples
+     *
+     * @param string $word
+     * @param int    $count
+     * @param array  $parameters
+     * @param string $locale
+     *
+     * @return string
+     */
+    public function transChoice($word, $count, array $parameters = array(), $locale = null)
     {
         if ($locale === null) {
             $locale = $this->locale;
         }
 
-        $parameters['%count%'] = $number;
+        $parameters['%count%'] = $count;
         $word = (string) $word;
 
-        return strtr($this->choose($this->get($word, $locale), (int) $number, $locale), $parameters);
+        return strtr($this->choose($this->get($word, $locale), (int) $count, $locale), $parameters);
     }
 
 
