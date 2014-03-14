@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<phpunit colors="true" bootstrap="./vendor/autoload.php">
+	<testsuites>
+		<testsuite name="Locale tests">
+			<directory>./tests/Moss/Locale/</directory>
+		</testsuite>
+	</testsuites>
+</phpunit>
