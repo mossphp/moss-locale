@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the Storage package
+ * This file is part of the Moss Locale package
  *
  * (c) Michal Wachowski <wachowski.michal@gmail.com>
  *
