@@ -23,12 +23,11 @@ interface LocaleInterface
      * Returns localized message
      *
      * @param string $word
-     * @param array  $parameters
-     * @param string $locale
+     * @param array  $placeholders
      *
      * @return string
      */
-    public function trans($word, array $parameters = array(), $locale = null);
+    public function trans($word, array $placeholders = array());
 
     /**
      * Returns plural localized message
@@ -37,10 +36,9 @@ interface LocaleInterface
      *
      * @param string $word
      * @param int    $count
-     * @param array  $parameters
-     * @param string $locale
+     * @param array  $placeholders
      *
      * @return string
      */
-    public function transChoice($word, $count, array $parameters = array(), $locale = null);
+    public function transChoice($word, $count, array $placeholders = array());
 }

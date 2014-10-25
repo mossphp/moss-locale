@@ -1,51 +1,55 @@
 <?php
+
 namespace Moss\Locale;
 
 
 class LocaleTest extends \PHPUnit_Framework_TestCase
 {
-
-    public function testLocale()
-    {
-        $locale = new Locale('pl');
-        $this->assertEquals('en', $locale->locale('en'));
-    }
-
     /**
-     * @dataProvider dataProvider
+     * @dataProvider dictionaryProvider
      */
-    public function testGetSet($arr, $word, $expected, $setLocale = 'pl', $getLocale = 'pl')
+    public function testTrans($key, $val)
     {
-        $locale = new Locale($setLocale);
-        $locale->set($arr, $setLocale);
-        $this->assertEquals($expected, $locale->get($word, $getLocale));
+        $Locale = new Locale('en', array($key => $val));
+        $this->assertEquals($val, $Locale->trans($key));
     }
 
-    public function dataProvider()
+    public function dictionaryProvider()
     {
         return array(
-            array(array(), 'foo', 'foo'),
-            array(array('foo' => 'Foo foo'), 'foo', 'Foo foo'),
-            array(array('foo' => 'Foo foo'), 'foo', 'Foo foo', 'en', 'en'),
-            array(array('foo' => 'Foo foo'), 'foo', 'foo', 'pl', 'en')
+            array('foo', 'Foo'),
+            array('bar', 'Bar'),
+            array('yada', 'Yada')
         );
     }
 
     /**
-     * @dataProvider paramProvider
+     * @dataProvider placeholderProvider
      */
-    public function testTrans($key, $val)
+    public function testTransWithPlaceHolders($word, $placeholders, $expected)
     {
-        $locale = new Locale('pl');
-        $this->assertEquals('Some sample '.$val, $locale->trans('Some sample '.$key, array($key => $val)));
+        $Locale = new Locale('en');
+        $this->assertEquals($expected, $Locale->trans($word, $placeholders));
     }
 
-    public function paramProvider()
+    public function placeholderProvider()
     {
         return array(
-            array('%some%', 'Foo'),
-            array('%sample%', 'Bar'),
-            array('%name%', 'Yada'),
+            array(
+                '%some% blah blah',
+                array('some' => 'Foo'),
+                'Foo blah blah'
+            ),
+            array(
+                '%some% %sample%',
+                array('some' => 'Foo', 'sample' => 'Bar'),
+                'Foo Bar'
+            ),
+            array(
+                '%some% %some%',
+                array('some' => 'Yada'),
+                'Yada Yada'
+            ),
         );
     }
 
@@ -56,8 +60,8 @@ class LocaleTest extends \PHPUnit_Framework_TestCase
     {
         $word = '{0} There are no %name%|{1} There is one %name%|]1,19] There are %count% %name%s|[20,Inf] There are many %name%s';
 
-        $locale = new Locale('pl');
-        $result = $locale->transChoice($word, $num, array('%name%' => 'Foo'));
+        $locale = new Locale('en');
+        $result = $locale->transChoice($word, $num, ['name' => 'Foo']);
 
         $this->assertEquals($expected, $result);
     }
