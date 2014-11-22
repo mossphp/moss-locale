@@ -20,14 +20,14 @@ class Dictionary implements DictionaryInterface
 {
     protected $language;
     protected $silentMode;
-    protected $translations = [];
+    protected $translations = array();
 
     /**
      * @param string $language
      * @param array  $translations
      * @param bool   $silentMode
      */
-    public function __construct($language, $translations = [], $silentMode = true)
+    public function __construct($language, $translations = array(), $silentMode = true)
     {
         $this->setLanguage($language);
         $this->silentMode = $silentMode;
@@ -68,14 +68,14 @@ class Dictionary implements DictionaryInterface
     public function getWord($word)
     {
         if (!array_key_exists($word, $this->translations)) {
-            if (!$this->silentMode) {
-                throw new \DomainException(sprintf('Translation is missing for "%s"', $word));
+            if ($this->silentMode) {
+                return $word;
             }
 
-            return $word;
+            throw new \DomainException(sprintf('Translation is missing for "%s"', $word));
         }
 
-        return $this->translations[$word]['word'];
+        return $this->translations[$word];
     }
 
     /**
@@ -86,7 +86,7 @@ class Dictionary implements DictionaryInterface
      *
      * @return $this
      */
-    public function set($word, $translation)
+    public function setWord($word, $translation)
     {
         $this->translations[$word] = $translation;
 
@@ -112,52 +112,8 @@ class Dictionary implements DictionaryInterface
      */
     public function setTranslations(array $translations)
     {
-        array_walk($translations, [$this, 'formatNode']);
         $this->translations = $translations;
 
         return $this;
-    }
-
-    /**
-     * Formats node to set array
-     *
-     * @param mixed $node
-     *
-     * @return array
-     */
-    protected function formatNode($node)
-    {
-        if (!is_array($node)) {
-            return [
-                'text' => (string) $node,
-                'comment' => null
-            ];
-        }
-
-        if (count($node) < 2) {
-            return [
-                'text' => (string) reset($node),
-                'comment' => null
-            ];
-        }
-
-        $result = [
-            'text' => null,
-            'comment' => null
-        ];
-
-        if (array_key_exists('text', $node)) {
-            $result['text'] = (string) $node['text'];
-        } elseif (array_key_exists(0, $node)) {
-            $result['text'] = (string) $node[0];
-        }
-
-        if (array_key_exists('comment', $node)) {
-            $result['comment'] = (string) $node['comment'];
-        } elseif (array_key_exists(1, $node)) {
-            $result['comment'] = (string) $node[1];
-        }
-
-        return $result;
     }
 }

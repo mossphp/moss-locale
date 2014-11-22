@@ -51,7 +51,7 @@ interface DictionaryInterface
      *
      * @return $this
      */
-    public function set($word, $translation);
+    public function setWord($word, $translation);
 
     /**
      * Gets Translators from reader
