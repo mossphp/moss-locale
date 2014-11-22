@@ -1,16 +1,19 @@
 <?php
 
-namespace Moss\Locale;
+namespace Moss\Locale\Translator;
 
 
-class LocaleTest extends \PHPUnit_Framework_TestCase
+class TranslatorTest extends \PHPUnit_Framework_TestCase
 {
     /**
      * @dataProvider dictionaryProvider
      */
     public function testTrans($key, $val)
     {
-        $Locale = new Locale('en', array($key => $val));
+        $dictionary = $this->getMock('\Moss\Locale\Translator\DictionaryInterface');
+        $dictionary->expects($this->any())->method('getWord')->with($key)->will($this->returnValue($val));
+
+        $Locale = new Translator('en', $dictionary);
         $this->assertEquals($val, $Locale->trans($key));
     }
 
@@ -28,7 +31,10 @@ class LocaleTest extends \PHPUnit_Framework_TestCase
      */
     public function testTransWithPlaceHolders($word, $placeholders, $expected)
     {
-        $Locale = new Locale('en');
+        $dictionary = $this->getMock('\Moss\Locale\Translator\DictionaryInterface');
+        $dictionary->expects($this->any())->method('getWord')->will($this->returnValue($word));
+
+        $Locale = new Translator('en', $dictionary);
         $this->assertEquals($expected, $Locale->trans($word, $placeholders));
     }
 
@@ -60,7 +66,10 @@ class LocaleTest extends \PHPUnit_Framework_TestCase
     {
         $word = '{0} There are no %name%|{1} There is one %name%|]1,19] There are %count% %name%s|[20,Inf] There are many %name%s';
 
-        $locale = new Locale('en');
+        $dictionary = $this->getMock('\Moss\Locale\Translator\DictionaryInterface');
+        $dictionary->expects($this->any())->method('getWord')->will($this->returnValue($word));
+
+        $locale = new Translator('en', $dictionary);
         $result = $locale->transChoice($word, $num, ['name' => 'Foo']);
 
         $this->assertEquals($expected, $result);

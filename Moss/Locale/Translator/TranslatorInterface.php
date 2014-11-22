@@ -9,14 +9,14 @@
  * file that was distributed with this source code.
  */
 
-namespace Moss\Locale;
+namespace Moss\Locale\Translator;
 
 /**
  * Locale interface
  *
  * @package Moss\Locale
  */
-interface LocaleInterface
+interface TranslatorInterface
 {
 
     /**
