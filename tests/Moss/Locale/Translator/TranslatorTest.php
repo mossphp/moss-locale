@@ -70,7 +70,7 @@ class TranslatorTest extends \PHPUnit_Framework_TestCase
         $dictionary->expects($this->any())->method('getWord')->will($this->returnValue($word));
 
         $locale = new Translator('en', $dictionary);
-        $result = $locale->transChoice($word, $num, ['name' => 'Foo']);
+        $result = $locale->transChoice($word, $num, array('name' => 'Foo'));
 
         $this->assertEquals($expected, $result);
     }
