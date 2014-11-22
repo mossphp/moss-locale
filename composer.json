@@ -1,6 +1,6 @@
 {
 	"name": "moss/locale",
-	"version": "1.0",
+	"version": "v1.0",
 	"description": "moss locale",
 	"keywords": ["locale", "i18n", "internationalization", "translation"],
 	"type": "i18n",

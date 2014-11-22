@@ -9,28 +9,31 @@
  * file that was distributed with this source code.
  */
 
-namespace Moss\Locale;
+namespace Moss\Locale\Translator;
+
 
 /**
- * Locale
+ * Translator implementation
  *
  * @package Moss\Locale
  */
-class Locale implements LocaleInterface
+class Translator implements TranslatorInterface
 {
+    private $intervalRegexp = '({\s*(\-?\d+(\.\d+)?[\s*,\s*\-?\d+(\.\d+)?]*)\s*})|(?P<left_delimiter>[\[\]])\s*(?P<left>-Inf|\-?\d+(\.\d+)?)\s*,\s*(?P<right>\+?Inf|\-?\d+(\.\d+)?)\s*(?P<right_delimiter>[\[\]])';
 
-    protected $intervalRegexp = '({\s*(\-?\d+(\.\d+)?[\s*,\s*\-?\d+(\.\d+)?]*)\s*})|(?P<left_delimiter>[\[\]])\s*(?P<left>-Inf|\-?\d+(\.\d+)?)\s*,\s*(?P<right>\+?Inf|\-?\d+(\.\d+)?)\s*(?P<right_delimiter>[\[\]])';
-    protected $dict = array();
-    protected $locale;
+    protected $language;
+    protected $dictionary;
 
     /**
      * Constructor
      *
-     * @param string $defaultLocale
+     * @param string              $language
+     * @param DictionaryInterface $dictionary
      */
-    public function __construct($defaultLocale)
+    public function __construct($language, DictionaryInterface $dictionary)
     {
-        $this->locale = $defaultLocale;
+        $this->language($language);
+        $this->dictionary = $dictionary;
     }
 
     /**
@@ -40,58 +43,92 @@ class Locale implements LocaleInterface
      *
      * @return string
      */
-    public function locale($locale = null)
+    public function language($locale = null)
     {
         if ($locale !== null) {
-            $this->locale = $locale;
+            $this->language = $locale;
         }
 
-        return $this->locale;
+        return $this->language;
     }
 
     /**
-     * Sets/adds words for locale
+     * Returns localized message
      *
-     * @param array  $dict
-     * @param string $locale
-     *
-     * @return $this
-     */
-    public function set(array $dict, $locale)
-    {
-        if (!isset($this->dict[$locale])) {
-            $this->dict[$locale] = array();
-        }
-
-        foreach ($dict as $key => $word) {
-            $this->dict[$locale][$key] = (string) $word;
-        }
-
-        return $this;
-    }
-
-    /**
-     * Retrieves word for locale
-     *
-     * @param string      $word
-     * @param null|string $locale
+     * @param string $word
+     * @param array  $placeholders
      *
      * @return string
      */
-    public function get($word, $locale = null)
+    public function trans($word, array $placeholders = [])
     {
-        if ($locale === null) {
-            $locale = $this->locale;
-        }
-
-        if (!isset($this->dict[$locale][$word])) {
-            return $word;
-        }
-
-        return $this->dict[$locale][$word];
+        return strtr(
+            $this->dictionary->getWord($word),
+            $this->preparePlaceholders($placeholders)
+        );
     }
 
-    protected function choose($message, $number, $locale)
+    /**
+     * Returns plural localized message
+     * Input message with intervals eg.:
+     * {0} There are no apples|{1} There is one apple|]1,19] There are %count% apples|[20,Inf] There are many apples
+     * The intervals follow the ISO 31-11 notation
+     *
+     * @param string $word
+     * @param int    $count
+     * @param array  $placeholders
+     *
+     * @return string
+     */
+    public function transChoice($word, $count, array $placeholders = [])
+    {
+        $placeholders ['%count%'] = $count;
+        $word = (string) $word;
+
+        return strtr(
+            $this->choose($this->dictionary->getWord($word), (int) $count),
+            $this->preparePlaceholders($placeholders)
+        );
+    }
+
+    /**
+     * Fills placeholder keys with %
+     *
+     * @param array $placeholders
+     *
+     * @return array
+     */
+    protected function preparePlaceholders(array $placeholders)
+    {
+        if (empty($placeholders)) {
+            return array();
+        }
+
+        $keys = array_keys($placeholders);
+
+        array_walk(
+            $keys,
+            function (&$key) {
+                if (substr($key, 0, 1) === '%' && substr($key, -1, 1) === '%') {
+                    return;
+                }
+
+                $key = '%' . $key . '%';
+            }
+        );
+
+        return array_combine($keys, array_values($placeholders));
+    }
+
+    /**
+     * Chooses proper plural part from provided message
+     *
+     * @param string string $message
+     * @param string int|float $number
+     *
+     * @return string
+     */
+    protected function choose($message, $number)
     {
         $parts = explode('|', $message);
         $explicitRules = array();
@@ -101,7 +138,7 @@ class Locale implements LocaleInterface
 
             if (preg_match('/^(?P<interval>' . $this->intervalRegexp . ')\s*(?P<message>.*?)$/x', $part, $matches)) {
                 $explicitRules[$matches['interval']] = $matches['message'];
-            } elseif (preg_match('/^\w+\:\s*(.*?)$/', $part, $matches)) {
+            } elseif (preg_match('/^\w\:\s*(.*?)$/', $part, $matches)) {
                 $standardRules[] = $matches[1];
             } else {
                 $standardRules[] = $part;
@@ -114,19 +151,27 @@ class Locale implements LocaleInterface
             }
         }
 
-        $position = $this->getPluralRule($number, $locale);
+        $position = $this->getPluralRule($number, $this->language);
 
         if (!isset($standardRules[$position])) {
             if (1 === count($parts) && isset($standardRules[0])) {
                 return $standardRules[0];
             }
 
-            throw new \InvalidArgumentException(sprintf('Unable to choose a translation for "%s" with locale "%s"', $message, $locale));
+            throw new \InvalidArgumentException(sprintf('Unable to choose a translation for "%s" with locale "%s"', $message));
         }
 
         return $standardRules[$position];
     }
 
+    /**
+     * Checks if number is in set interval
+     *
+     * @param int|float $number
+     * @param string    $interval
+     *
+     * @return bool
+     */
     protected function test($number, $interval)
     {
         $interval = trim($interval);
@@ -151,11 +196,18 @@ class Locale implements LocaleInterface
         return false;
     }
 
+    /**
+     * Converts numbers from string to floats
+     *
+     * @param string $number
+     *
+     * @return float
+     */
     protected function convertNumber($number)
     {
         if ('-Inf' === $number) {
             return log(0);
-        } elseif ('+Inf' === $number || 'Inf' === $number) {
+        } elseif ('Inf' === $number || 'Inf' === $number) {
             return -log(0);
         }
 
@@ -315,48 +367,6 @@ class Locale implements LocaleInterface
             default:
                 return 0;
         }
-    }
-
-    /**
-     * Returns localized message
-     *
-     * @param string $word
-     * @param array  $parameters
-     * @param string $locale
-     *
-     * @return string
-     */
-    public function trans($word, array $parameters = array(), $locale = null)
-    {
-        if ($locale === null) {
-            $locale = $this->locale;
-        }
-
-        return strtr($this->get($word, $locale), $parameters);
-    }
-
-    /**
-     * Returns plural localized message
-     * Input message eg.:
-     * {0} There are no apples|{1} There is one apple|]1,19] There are %count% apples|[20,Inf] There are many apples
-     *
-     * @param string $word
-     * @param int    $count
-     * @param array  $parameters
-     * @param string $locale
-     *
-     * @return string
-     */
-    public function transChoice($word, $count, array $parameters = array(), $locale = null)
-    {
-        if ($locale === null) {
-            $locale = $this->locale;
-        }
-
-        $parameters['%count%'] = $count;
-        $word = (string) $word;
-
-        return strtr($this->choose($this->get($word, $locale), (int) $count, $locale), $parameters);
     }
 
 
