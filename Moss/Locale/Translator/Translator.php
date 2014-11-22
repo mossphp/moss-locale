@@ -60,7 +60,7 @@ class Translator implements TranslatorInterface
      *
      * @return string
      */
-    public function trans($word, array $placeholders = [])
+    public function trans($word, array $placeholders = array())
     {
         return strtr(
             $this->dictionary->getWord($word),
@@ -80,7 +80,7 @@ class Translator implements TranslatorInterface
      *
      * @return string
      */
-    public function transChoice($word, $count, array $placeholders = [])
+    public function transChoice($word, $count, array $placeholders = array())
     {
         $placeholders ['%count%'] = $count;
         $word = (string) $word;
