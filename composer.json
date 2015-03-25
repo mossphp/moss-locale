@@ -1,25 +1,33 @@
 {
-	"name": "moss/locale",
-	"version": "v1.0",
-	"description": "moss locale",
-	"keywords": ["locale", "i18n", "internationalization", "translation"],
-	"type": "i18n",
-	"license": "MIT",
-	"authors": [
-		{
-			"name": "Michal Wachowski",
-			"email": "wachowski.michal@gmail.com"
-		}
-	],
-	"require": {
-		"php": ">=5.3.4"
-	},
-	"require-dev": {
-		"phpunit/phpunit": "3.7.*"
-	},
-	"autoload": {
-		"psr-0": {
-			"Moss\\Locale\\": ""
-		}
-	}
+  "name": "moss/locale",
+  "version": "v1.0",
+  "description": "moss locale",
+  "keywords": [
+    "locale",
+    "i18n",
+    "internationalization",
+    "translation"
+  ],
+  "type": "i18n",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Michal Wachowski",
+      "email": "wachowski.michal@gmail.com"
+    }
+  ],
+  "require": {
+    "php": ">=5.3.4"
+  },
+  "require-dev": {
+    "phpunit/phpunit": ">=3.7"
+  },
+  "autoload": {
+    "psr-0": {
+      "Moss\\Locale\\": ""
+    }
+  },
+  "config": {
+    "bin-dir": "bin/"
+  }
 }

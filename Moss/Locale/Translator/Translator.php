@@ -11,29 +11,40 @@
 
 namespace Moss\Locale\Translator;
 
-
 /**
- * Translator implementation
+ * Translator class
  *
- * @package Moss\Locale
+ * @package Moss Router
+ * @author  Michal Wachowski <wachowski.michal@gmail.com>
  */
 class Translator implements TranslatorInterface
 {
     private $intervalRegexp = '({\s*(\-?\d+(\.\d+)?[\s*,\s*\-?\d+(\.\d+)?]*)\s*})|(?P<left_delimiter>[\[\]])\s*(?P<left>-Inf|\-?\d+(\.\d+)?)\s*,\s*(?P<right>\+?Inf|\-?\d+(\.\d+)?)\s*(?P<right_delimiter>[\[\]])';
 
-    protected $language;
-    protected $dictionary;
+    protected $locale;
+
+    /**
+     * @var DictionaryInterface[]
+     */
+    protected $dictionaries = [];
+
+    protected $silent;
 
     /**
      * Constructor
      *
-     * @param string              $language
-     * @param DictionaryInterface $dictionary
+     * @param string                $locale
+     * @param DictionaryInterface[] $dictionaries
+     * @param bool                  $silent
      */
-    public function __construct($language, DictionaryInterface $dictionary)
+    public function __construct($locale, array $dictionaries, $silent = true)
     {
-        $this->language($language);
-        $this->dictionary = $dictionary;
+        $this->locale = $locale;
+        $this->silent = (bool) $silent;
+
+        foreach ($dictionaries as $dictionary) {
+            $this->addDictionary($dictionary);
+        }
     }
 
     /**
@@ -43,13 +54,44 @@ class Translator implements TranslatorInterface
      *
      * @return string
      */
-    public function language($locale = null)
+    public function locale($locale = null)
     {
         if ($locale !== null) {
-            $this->language = $locale;
+            $this->locale = $locale;
         }
 
-        return $this->language;
+        return $this->locale;
+    }
+
+    /**
+     * Adds dictionary to translator
+     *
+     * @param DictionaryInterface $dictionary
+     * @param null|int            $priority
+     *
+     * @return $this
+     */
+    public function addDictionary(DictionaryInterface $dictionary, $priority = null)
+    {
+        if ($priority === null) {
+            $this->dictionaries[] = $dictionary;
+
+            return $this;
+        }
+
+        array_splice($this->dictionaries, $priority, 0, array($dictionary));
+
+        return $this;
+    }
+
+    /**
+     * Returns dictionaries instances
+     *
+     * @return DictionaryInterface[]
+     */
+    public function dictionaries()
+    {
+        return $this->dictionaries;
     }
 
     /**
@@ -60,11 +102,11 @@ class Translator implements TranslatorInterface
      *
      * @return string
      */
-    public function trans($word, array $placeholders = [])
+    public function translate($word, array $placeholders = [])
     {
-        return strtr(
-            $this->dictionary->getWord($word),
-            $this->preparePlaceholders($placeholders)
+        return $this->replacePlaceholders(
+            $this->getText($word),
+            $placeholders
         );
     }
 
@@ -80,32 +122,73 @@ class Translator implements TranslatorInterface
      *
      * @return string
      */
-    public function transChoice($word, $count, array $placeholders = [])
+    public function translatePlural($word, $count, array $placeholders = [])
     {
         $placeholders ['%count%'] = $count;
         $word = (string) $word;
 
-        return strtr(
-            $this->choose($this->dictionary->getWord($word), (int) $count),
-            $this->preparePlaceholders($placeholders)
+        return $this->replacePlaceholders(
+            $this->choose($this->getText($word), (int) $count),
+            $placeholders
         );
     }
 
     /**
-     * Fills placeholder keys with %
+     * Returns word from first dictionary
+     * If not in silent mode - throws exception when not found
      *
-     * @param array $placeholders
+     * @param string $word
+     *
+     * @return null|string
+     * @throws TranslatorException
+     */
+    protected function getText($word)
+    {
+        foreach ($this->dictionaries as $dictionary) {
+            if (null !== $text = $dictionary->getText($word)) {
+                return $text;
+            }
+        }
+
+        if (!$this->silent) {
+            throw new TranslatorException(sprintf('Unable to translate "%s" - missing translation for locale "%s"', $word, $this->locale));
+        }
+
+        return $word;
+    }
+
+    /**
+     * Returns all translations from all dictionaries
      *
      * @return array
      */
-    protected function preparePlaceholders(array $placeholders)
+    public function translations()
     {
-        if (empty($placeholders)) {
-            return array();
+        $translations = [];
+        foreach ($this->dictionaries as $dictionary) {
+            $translations = array_merge($translations, $dictionary->getTranslations());
+        }
+
+        return $translations;
+    }
+
+    /**
+     * Replaces placeholders with passed values
+     *
+     * @param string $word
+     * @param array  $placeholders
+     *
+     * @return string
+     */
+    protected function replacePlaceholders($word, array $placeholders)
+    {
+        if ($placeholders === array_values($placeholders)) {
+            $keys = [];
+            preg_match_all('/%[^%]+%/i', $word, $keys, \PREG_PATTERN_ORDER);
+            $placeholders = array_combine(array_unique($keys[0]), $placeholders);
         }
 
         $keys = array_keys($placeholders);
-
         array_walk(
             $keys,
             function (&$key) {
@@ -117,7 +200,10 @@ class Translator implements TranslatorInterface
             }
         );
 
-        return array_combine($keys, array_values($placeholders));
+        return strtr(
+            $word,
+            array_combine($keys, $placeholders)
+        );
     }
 
     /**
@@ -131,8 +217,8 @@ class Translator implements TranslatorInterface
     protected function choose($message, $number)
     {
         $parts = explode('|', $message);
-        $explicitRules = array();
-        $standardRules = array();
+        $explicitRules = [];
+        $standardRules = [];
         foreach ($parts as $part) {
             $part = trim($part);
 
@@ -151,17 +237,7 @@ class Translator implements TranslatorInterface
             }
         }
 
-        $position = $this->getPluralRule($number, $this->language);
-
-        if (!isset($standardRules[$position])) {
-            if (1 === count($parts) && isset($standardRules[0])) {
-                return $standardRules[0];
-            }
-
-            throw new \InvalidArgumentException(sprintf('Unable to choose a translation for "%s" with locale "%s"', $message));
-        }
-
-        return $standardRules[$position];
+        return reset($standardRules);
     }
 
     /**
@@ -213,161 +289,4 @@ class Translator implements TranslatorInterface
 
         return (float) $number;
     }
-
-    /**
-     * Returns the plural position to use for the given locale and number.
-     *
-     * @param integer $number The number
-     * @param string  $locale The locale
-     *
-     * @return integer The plural position
-     */
-    protected function getPluralRule($number, $locale)
-    {
-        if ("pt_BR" == $locale) {
-            $locale = "xbr";
-        }
-
-        if (strlen($locale) > 3) {
-            $locale = substr($locale, 0, -strlen(strrchr($locale, '_')));
-        }
-
-        /*
-        * The plural rules are derived from code of the Zend Framework (2010-09-25),
-        * which is subject to the new BSD license (http://framework.zend.com/license/new-bsd).
-        * Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
-        */
-        switch ($locale) {
-            case 'bo':
-            case 'dz':
-            case 'id':
-            case 'ja':
-            case 'jv':
-            case 'ka':
-            case 'km':
-            case 'kn':
-            case 'ko':
-            case 'ms':
-            case 'th':
-            case 'tr':
-            case 'vi':
-            case 'zh':
-                return 0;
-                break;
-
-            case 'af':
-            case 'az':
-            case 'bn':
-            case 'bg':
-            case 'ca':
-            case 'da':
-            case 'de':
-            case 'el':
-            case 'en':
-            case 'eo':
-            case 'es':
-            case 'et':
-            case 'eu':
-            case 'fa':
-            case 'fi':
-            case 'fo':
-            case 'fur':
-            case 'fy':
-            case 'gl':
-            case 'gu':
-            case 'ha':
-            case 'he':
-            case 'hu':
-            case 'is':
-            case 'it':
-            case 'ku':
-            case 'lb':
-            case 'ml':
-            case 'mn':
-            case 'mr':
-            case 'nah':
-            case 'nb':
-            case 'ne':
-            case 'nl':
-            case 'nn':
-            case 'no':
-            case 'om':
-            case 'or':
-            case 'pa':
-            case 'pap':
-            case 'ps':
-            case 'pt':
-            case 'so':
-            case 'sq':
-            case 'sv':
-            case 'sw':
-            case 'ta':
-            case 'te':
-            case 'tk':
-            case 'ur':
-            case 'zu':
-                return ($number == 1) ? 0 : 1;
-
-            case 'am':
-            case 'bh':
-            case 'fil':
-            case 'fr':
-            case 'gun':
-            case 'hi':
-            case 'ln':
-            case 'mg':
-            case 'nso':
-            case 'xbr':
-            case 'ti':
-            case 'wa':
-                return (($number == 0) || ($number == 1)) ? 0 : 1;
-
-            case 'be':
-            case 'bs':
-            case 'hr':
-            case 'ru':
-            case 'sr':
-            case 'uk':
-                return (($number % 10 == 1) && ($number % 100 != 11)) ? 0 : ((($number % 10 >= 2) && ($number % 10 <= 4) && (($number % 100 < 10) || ($number % 100 >= 20))) ? 1 : 2);
-
-            case 'cs':
-            case 'sk':
-                return ($number == 1) ? 0 : ((($number >= 2) && ($number <= 4)) ? 1 : 2);
-
-            case 'ga':
-                return ($number == 1) ? 0 : (($number == 2) ? 1 : 2);
-
-            case 'lt':
-                return (($number % 10 == 1) && ($number % 100 != 11)) ? 0 : ((($number % 10 >= 2) && (($number % 100 < 10) || ($number % 100 >= 20))) ? 1 : 2);
-
-            case 'sl':
-                return ($number % 100 == 1) ? 0 : (($number % 100 == 2) ? 1 : ((($number % 100 == 3) || ($number % 100 == 4)) ? 2 : 3));
-
-            case 'mk':
-                return ($number % 10 == 1) ? 0 : 1;
-
-            case 'mt':
-                return ($number == 1) ? 0 : ((($number == 0) || (($number % 100 > 1) && ($number % 100 < 11))) ? 1 : ((($number % 100 > 10) && ($number % 100 < 20)) ? 2 : 3));
-
-            case 'lv':
-                return ($number == 0) ? 0 : ((($number % 10 == 1) && ($number % 100 != 11)) ? 1 : 2);
-
-            case 'pl':
-                return ($number == 1) ? 0 : ((($number % 10 >= 2) && ($number % 10 <= 4) && (($number % 100 < 12) || ($number % 100 > 14))) ? 1 : 2);
-
-            case 'cy':
-                return ($number == 1) ? 0 : (($number == 2) ? 1 : ((($number == 8) || ($number == 11)) ? 2 : 3));
-
-            case 'ro':
-                return ($number == 1) ? 0 : ((($number == 0) || (($number % 100 > 0) && ($number % 100 < 20))) ? 1 : 2);
-
-            case 'ar':
-                return ($number == 0) ? 0 : (($number == 1) ? 1 : (($number == 2) ? 2 : ((($number >= 3) && ($number <= 10)) ? 3 : ((($number >= 11) && ($number <= 99)) ? 4 : 5))));
-
-            default:
-                return 0;
-        }
-    }
-
-
 }

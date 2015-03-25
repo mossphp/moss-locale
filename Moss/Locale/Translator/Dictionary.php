@@ -12,25 +12,23 @@
 namespace Moss\Locale\Translator;
 
 /**
- * Dictionary for Translator
+ * Basic array dictionary
  *
- * @package Moss\Locale
+ * @package Moss Router
+ * @author  Michal Wachowski <wachowski.michal@gmail.com>
  */
 class Dictionary implements DictionaryInterface
 {
-    protected $language;
-    protected $silentMode;
-    protected $translations = array();
+    protected $locale;
+    protected $translations = [];
 
     /**
-     * @param string $language
-     * @param array  $translations
-     * @param bool   $silentMode
+     * @param string $locale
+     * @param array $translations
      */
-    public function __construct($language, $translations = array(), $silentMode = true)
+    public function __construct($locale, $translations = [])
     {
-        $this->setLanguage($language);
-        $this->silentMode = $silentMode;
+        $this->locale = $locale;
         $this->setTranslations($translations);
     }
 
@@ -39,62 +37,38 @@ class Dictionary implements DictionaryInterface
      *
      * @return string
      */
-    public function getLanguage()
+    public function getLocale()
     {
-        return $this->language;
+        return $this->locale;
     }
 
     /**
-     * Sets locale
-     *
-     * @param string $locale
-     *
-     * @return $this
-     */
-    public function setLanguage($locale)
-    {
-        $this->language = $locale;
-
-        return $this;
-    }
-
-    /**
-     * Returns Translator for set word or if missing - word
+     * Returns translation for set word or if missing - word
      *
      * @param string $word
-     *
      * @return string
      */
-    public function getWord($word)
+    public function getText($word)
     {
-        if (!array_key_exists($word, $this->translations)) {
-            if ($this->silentMode) {
-                return $word;
-            }
-
-            throw new \DomainException(sprintf('Translation is missing for "%s"', $word));
-        }
-
-        return $this->translations[$word];
+        return array_key_exists($word, $this->translations) ? $this->translations[$word] : null;
     }
 
     /**
      * Adds new or updates entry to dictionary
      *
-     * @param string      $word
-     * @param string      $translation
-     *
+     * @param string $word
+     * @param string $text
      * @return $this
      */
-    public function setWord($word, $translation)
+    public function setText($word, $text)
     {
-        $this->translations[$word] = $translation;
+        $this->translations[$word] = $text;
 
         return $this;
     }
 
     /**
-     * Gets Translators from reader
+     * Gets translations
      *
      * @return array
      */
@@ -104,10 +78,9 @@ class Dictionary implements DictionaryInterface
     }
 
     /**
-     * Set Translators to writer
+     * Set translations
      *
      * @param array $translations
-     *
      * @return $this
      */
     public function setTranslations(array $translations)

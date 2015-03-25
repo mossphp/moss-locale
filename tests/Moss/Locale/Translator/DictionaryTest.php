@@ -8,36 +8,26 @@ class DictionaryTest extends \PHPUnit_Framework_TestCase
     public function testLanguage()
     {
         $dictionary = new Dictionary('en');
-        $this->assertEquals('en', $dictionary->getLanguage());
+        $this->assertEquals('en', $dictionary->getLocale());
     }
 
     public function testWord()
     {
         $dictionary = new Dictionary('en');
-        $dictionary->setWord('foo', 'Foo');
-        $this->assertEquals('Foo', $dictionary->getWord('foo'));
-    }
-
-    /**
-     * @expectedException \DomainException
-     * @expectedExceptionMessage Translation is missing for
-     */
-    public function testGetWordWithMissingTranslationWithoutSilentMode()
-    {
-        $dictionary = new Dictionary('en', array(), false);
-        $dictionary->getWord('foo');
+        $dictionary->setText('foo', 'Foo');
+        $this->assertEquals('Foo', $dictionary->getText('foo'));
     }
 
     public function testGetWordWithMissingTranslationWithSilentMode()
     {
         $dictionary = new Dictionary('en', array(), true);
-        $this->assertEquals('foo', $dictionary->getWord('foo'));
+        $this->assertNull($dictionary->getText('foo'));
     }
 
     public function testTranslations()
     {
         $dictionary = new Dictionary('en', array('foo' => 'Foo'));
-        $dictionary->setWord('bar', 'Bar');
+        $dictionary->setText('bar', 'Bar');
         $this->assertEquals(array('foo' => 'Foo', 'bar' => 'Bar'), $dictionary->getTranslations());
     }
 }
