@@ -57,6 +57,6 @@ class IntlFormatterTest extends \PHPUnit_Framework_TestCase
         $date = new \DateTime('2015-03-05 13:01', new \DateTimeZone('UTC'));
 
         $formatter = new IntlFormatter('en_US', 100, 'UTC');
-        $this->assertEquals('3/5/15, 1:01 PM', $formatter->formatDateTime($date));
+        $this->assertRegExp('/^3\/5\/15,? 1:01 PM$/', $formatter->formatDateTime($date));
     }
 }
