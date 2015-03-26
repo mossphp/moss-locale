@@ -104,7 +104,7 @@ class Translator implements TranslatorInterface
      *
      * @param string $word
      *
-     * @return null|string
+     * @return string
      * @throws TranslatorException
      */
     protected function getText($word)
