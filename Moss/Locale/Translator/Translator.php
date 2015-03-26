@@ -125,7 +125,7 @@ class Translator implements TranslatorInterface
      *
      * @param DictionaryInterface $dictionary
      *
-     * @return array
+     * @return DictionaryInterface
      */
     public function dictionary(DictionaryInterface $dictionary = null)
     {
