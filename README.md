@@ -1,6 +1,10 @@
 # Moss Locale
 
-Basic tool for handling localised stuff
+[![Build Status](https://travis-ci.org/mossphp/moss-locale.png?branch=master)](https://travis-ci.org/mossphp/moss-locale)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/mossphp/moss-locale/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/mossphp/moss-locale/?branch=master)
+[![Code Coverage](https://scrutinizer-ci.com/g/mossphp/moss-locale/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/mossphp/moss-locale/?branch=master)
+
+Basic tool for handling translations, formatting and stuff.
 
 ## Locale
 
@@ -8,13 +12,19 @@ Class that handles locale name, timezone and currency sub unit.
 
 ```php
 	$locale = new Locale('en_GB', 'UTC', 100);
+	
 	echo $locale->locale(); // will print "en_GB" 
+	$locale->locale('en_US'); // will change locale to en_US
+	
 	echo $locale->language(); // will print "en"
 	echo $locale->territory(); // will print "GB"
+	
 	echo $locale->currencySubUnit(); // will print 100
+	$locale->currencySubUnit(1000); // will change sub unit to 1000
+	
 	echo $locale->timezone(); // will print "UTC"
+	$locale->timezone('Europe/Berlin'); will change default timezone (used by all date functions) to 'Europe/Berlin'
 ```
-
 
 
 ## Translator
@@ -35,11 +45,12 @@ Lower priority value is better - 0 means highest priority.
 
 Dictionaries are list of key-value pairs, where key is a word/sentence/identifier and is translated text.
 Eg. EN to DE:
+
 ```php
-[
-	'There be %placeholder%' => 'dort %placeholder%',
-	'welcome.string' => 'Hallo %name%!'
-]
+	[
+		'There be %placeholder%' => 'dort %placeholder%',
+		'welcome.string' => 'Hallo %name%!'
+	]
 ```
 
 ```php
@@ -59,9 +70,9 @@ Intervals follow ISO 31-11 notation:
 ```
 
 ```php
-[
-	'apple.count' => '{0} There are no apples|{1} There is one apple|]1,19] There are %count% apples|[20,Inf] There are many apples'
-]
+	[
+		'apple.count' => '{0} There are no apples|{1} There is one apple|]1,19] There are %count% apples|[20,Inf] There are many apples'
+	]
 ```
 
 ```php
