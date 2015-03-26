@@ -8,49 +8,14 @@ Class that handles locale name, timezone and currency sub unit.
 
 ```php
 	$locale = new Locale('en_GB', 'UTC', 100);
+	echo $locale->locale(); // will print "en_GB" 
+	echo $locale->language(); // will print "en"
+	echo $locale->territory(); // will print "GB"
+	echo $locale->currencySubUnit(); // will print 100
+	echo $locale->timezone(); // will print "UTC"
 ```
 
-To get current locale:
-```php
-	echo $locale->locale();
-```
 
-To set new locale:
-```php
-	$locale->locale('en_US');
-```
-
-To get language from locale:
-```php
-	$locale->language();
-```
-
-To get territory from locale:
-```php
-	$locale->territory();
-```
-
-To get currency sub unit (used as divisor/multiplier for converting amounts to integers):
-```php
-	echo $locale->currencySubUnit();
-```
-
-To set currency sub unit:
-```php
-	$locale->currencySubUnit(1000);
-```
-
-To get current timezone (by default, uses value from INI `date.timezone`)
-```php
-	echo $locale->timezone();
-```
-
-To set timezone (changes also value for default timezone used by all date/time functions):
-```php
-	$locale->timezone('UTC');
-```
-
-To set new timezone:
 
 ## Translator
 
@@ -60,12 +25,12 @@ Translator translates simple texts, singular and plural, with optional placehold
 	$translator = new Translator('en_GB', []);
 ```
 
-As translation sources dictionaries are used. Translator can handle multiple sources at once with different priorities.
+Translator uses dictionaries as source of translations
 Lower priority value is better - 0 means highest priority.
 
 ```php
-	$dictionary = new Dictionary('en_GB', ['dude' => 'laddy']);
-	$translator->addDictionary($dictionary, 0);
+	$dictionary = new ArrayDictionary('en_GB', ['dude' => 'laddy']);
+	$translator = new Translator('en_GB', $dictionary);
 ```
 
 Dictionaries are list of key-value pairs, where key is a word/sentence/identifier and is translated text.
@@ -105,6 +70,19 @@ Intervals follow ISO 31-11 notation:
 	// prints There is one apple when $count = 1
 	// prints There are %count% apples when $count > 1 && $count >= 19
 	// prints There are many apples when $count >= 20
+```
+
+Translator comes with `MultiDictionary` class that allows for combining multiple dictionaries as one.
+For example, when default translations come from files, and they can be changed in database.
+`MultiDictionary` allows for prioritizing dictionaries.
+Usually you pass dictionaries trough constructor, and such case first dictionary with requested translation wins.
+But there are situations where dictionaries are added after instantiation, just when adding new dictionary provide its priority.
+If not - it will be added as last one.
+Lower number is better - 0 is highest priority.
+ 
+```php
+	$multi = new MultiDictionary('en_GB');
+	$multi->addDictionary($dictionary, 0);
 ```
 
 ## Formatter

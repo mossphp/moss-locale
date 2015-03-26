@@ -14,7 +14,7 @@ namespace Moss\Locale\Formatter;
 /**
  * Plain php formatter interface implementation
  *
- * @package Moss Router
+ * @package Moss Locale
  * @author  Michal Wachowski <wachowski.michal@gmail.com>
  */
 class PlainFormatter implements FormatterInterface

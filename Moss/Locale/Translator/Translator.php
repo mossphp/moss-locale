@@ -14,7 +14,7 @@ namespace Moss\Locale\Translator;
 /**
  * Translator class
  *
- * @package Moss Router
+ * @package Moss Locale
  * @author  Michal Wachowski <wachowski.michal@gmail.com>
  */
 class Translator implements TranslatorInterface
@@ -24,27 +24,24 @@ class Translator implements TranslatorInterface
     protected $locale;
 
     /**
-     * @var DictionaryInterface[]
+     * @var DictionaryInterface
      */
-    protected $dictionaries = [];
+    protected $dictionary;
 
     protected $silent;
 
     /**
      * Constructor
      *
-     * @param string                $locale
-     * @param DictionaryInterface[] $dictionaries
-     * @param bool                  $silent
+     * @param string              $locale
+     * @param DictionaryInterface $dictionary
+     * @param bool                $silent
      */
-    public function __construct($locale, array $dictionaries, $silent = true)
+    public function __construct($locale, DictionaryInterface $dictionary, $silent = true)
     {
         $this->locale = $locale;
         $this->silent = (bool) $silent;
-
-        foreach ($dictionaries as $dictionary) {
-            $this->addDictionary($dictionary);
-        }
+        $this->dictionary = $dictionary;
     }
 
     /**
@@ -61,37 +58,6 @@ class Translator implements TranslatorInterface
         }
 
         return $this->locale;
-    }
-
-    /**
-     * Adds dictionary to translator
-     *
-     * @param DictionaryInterface $dictionary
-     * @param null|int            $priority
-     *
-     * @return $this
-     */
-    public function addDictionary(DictionaryInterface $dictionary, $priority = null)
-    {
-        if ($priority === null) {
-            $this->dictionaries[] = $dictionary;
-
-            return $this;
-        }
-
-        array_splice($this->dictionaries, $priority, 0, array($dictionary));
-
-        return $this;
-    }
-
-    /**
-     * Returns dictionaries instances
-     *
-     * @return DictionaryInterface[]
-     */
-    public function dictionaries()
-    {
-        return $this->dictionaries;
     }
 
     /**
@@ -125,7 +91,6 @@ class Translator implements TranslatorInterface
     public function translatePlural($word, $count, array $placeholders = [])
     {
         $placeholders ['%count%'] = $count;
-        $word = (string) $word;
 
         return $this->replacePlaceholders(
             $this->choose($this->getText($word), (int) $count),
@@ -144,10 +109,8 @@ class Translator implements TranslatorInterface
      */
     protected function getText($word)
     {
-        foreach ($this->dictionaries as $dictionary) {
-            if (null !== $text = $dictionary->getText($word)) {
-                return $text;
-            }
+        if (null !== $translation = $this->dictionary->getText($word)) {
+            return $translation;
         }
 
         if (!$this->silent) {
@@ -158,18 +121,19 @@ class Translator implements TranslatorInterface
     }
 
     /**
-     * Returns all translations from all dictionaries
+     * Returns dictionary instance
+     *
+     * @param DictionaryInterface $dictionary
      *
      * @return array
      */
-    public function translations()
+    public function dictionary(DictionaryInterface $dictionary = null)
     {
-        $translations = [];
-        foreach ($this->dictionaries as $dictionary) {
-            $translations = array_merge($translations, $dictionary->getTranslations());
+        if ($dictionary !== null) {
+            $this->dictionary = $dictionary;
         }
 
-        return $translations;
+        return $this->dictionary;
     }
 
     /**

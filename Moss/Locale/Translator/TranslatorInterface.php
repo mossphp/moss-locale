@@ -14,7 +14,7 @@ namespace Moss\Locale\Translator;
 /**
  * Translator interface
  *
- * @package Moss Router
+ * @package Moss Locale
  * @author  Michal Wachowski <wachowski.michal@gmail.com>
  */
 interface TranslatorInterface
@@ -30,7 +30,7 @@ interface TranslatorInterface
      * Returns localized message
      *
      * @param string $word
-     * @param array $placeholders
+     * @param array  $placeholders
      *
      * @return string
      */
@@ -40,21 +40,22 @@ interface TranslatorInterface
      * Returns plural localized message
      * Input message with intervals eg.:
      * {0} There are no apples|{1} There is one apple|]1,19] There are %count% apples|[20,Inf] There are many apples
-     *
      * The intervals follow the ISO 31-11 notation
      *
      * @param string $word
-     * @param int $count
-     * @param array $placeholders
+     * @param int    $count
+     * @param array  $placeholders
      *
      * @return string
      */
     public function translatePlural($word, $count, array $placeholders = []);
 
     /**
-     * Returns all translations from all dictionaries
+     * Returns dictionary instance
+     *
+     * @param DictionaryInterface $dictionary
      *
      * @return array
      */
-    public function translations();
+    public function dictionary(DictionaryInterface $dictionary = null);
 }

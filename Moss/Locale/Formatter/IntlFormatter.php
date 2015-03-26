@@ -14,7 +14,7 @@ namespace Moss\Locale\Formatter;
 /**
  * Intl implementation of FormatterInterface
  *
- * @package Moss Router
+ * @package Moss Locale
  * @author  Michal Wachowski <wachowski.michal@gmail.com>
  */
 class IntlFormatter implements FormatterInterface

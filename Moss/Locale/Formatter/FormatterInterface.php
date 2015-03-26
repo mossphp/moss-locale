@@ -14,7 +14,7 @@ namespace Moss\Locale\Formatter;
 /**
  * Formatter interface
  *
- * @package Moss Router
+ * @package Moss Locale
  * @author  Michal Wachowski <wachowski.michal@gmail.com>
  */
 interface FormatterInterface

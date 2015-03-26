@@ -14,10 +14,10 @@ namespace Moss\Locale\Translator;
 /**
  * Basic array dictionary
  *
- * @package Moss Router
+ * @package Moss Locale
  * @author  Michal Wachowski <wachowski.michal@gmail.com>
  */
-class Dictionary implements DictionaryInterface
+class ArrayDictionary implements DictionaryInterface
 {
     protected $locale;
     protected $translations = [];

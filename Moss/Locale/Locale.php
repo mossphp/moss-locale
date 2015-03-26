@@ -14,7 +14,7 @@ namespace Moss\Locale;
 /**
  * Locale
  *
- * @package Moss Router
+ * @package Moss Locale
  * @author  Michal Wachowski <wachowski.michal@gmail.com>
  */
 class Locale implements LocaleInterface
@@ -60,7 +60,7 @@ class Locale implements LocaleInterface
      */
     public function language()
     {
-        return substr($this->locale(), 0, 2);
+        return substr($this->locale(), 0, strpos($this->locale, '_'));
     }
 
     /**
@@ -70,7 +70,7 @@ class Locale implements LocaleInterface
      */
     public function territory()
     {
-        return substr($this->locale(), 3);
+        return substr($this->locale(), strpos($this->locale, '_') + 1);
     }
 
     /**

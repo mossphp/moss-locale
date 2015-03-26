@@ -52,16 +52,42 @@ class LocaleTest extends \PHPUnit_Framework_TestCase
         ];
     }
 
-    public function testLanguage()
+    /**
+     * @dataProvider languageProvider
+     */
+    public function testLanguage($string, $expected)
     {
-        $locale = new Locale('en_GB', 'UTC', 100);
-        $this->assertEquals('en', $locale->language());
+        $locale = new Locale($string, 'UTC', 100);
+        $this->assertEquals($expected, $locale->language());
     }
 
-    public function testTerritory()
+    public function languageProvider()
     {
-        $locale = new Locale('en_GB', 'UTC', 100);
-        $this->assertEquals('GB', $locale->territory());
+        return [
+            ['en-GB', 'en'],
+            ['en_GB', 'en'],
+            ['arn-CL', 'arn'],
+            ['arn_CL', 'arn']
+        ];
+    }
+
+    /**
+     * @dataProvider territoryProvider
+     */
+    public function testTerritory($string, $expected)
+    {
+        $locale = new Locale($string, 'UTC', 100);
+        $this->assertEquals($expected, $locale->territory());
+    }
+
+    public function territoryProvider()
+    {
+        return [
+            ['en-GB', 'GB'],
+            ['en_GB', 'GB'],
+            ['arn-CL', 'CL'],
+            ['arn_CL', 'CL']
+        ];
     }
 
     public function testCurrencySubUnit()

@@ -14,7 +14,7 @@ namespace Moss\Locale;
 /**
  * Locale interface
  *
- * @package Moss Router
+ * @package Moss Locale
  * @author  Michal Wachowski <wachowski.michal@gmail.com>
  */
 interface LocaleInterface
