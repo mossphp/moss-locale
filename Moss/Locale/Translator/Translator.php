@@ -146,27 +146,18 @@ class Translator implements TranslatorInterface
      */
     protected function replacePlaceholders($word, array $placeholders)
     {
-        if ($placeholders === array_values($placeholders)) {
-            $keys = [];
-            preg_match_all('/%[^%]+%/i', $word, $keys, \PREG_PATTERN_ORDER);
-            $placeholders = array_combine(array_unique($keys[0]), $placeholders);
-        }
-
-        $keys = array_keys($placeholders);
-        array_walk(
-            $keys,
-            function (&$key) {
-                if (substr($key, 0, 1) === '%' && substr($key, -1, 1) === '%') {
-                    return;
-                }
-
-                $key = '%' . $key . '%';
+        foreach ($placeholders as $key => $value) {
+            if (substr($key, 0, 1) === '%' && substr($key, -1, 1) === '%') {
+                continue;
             }
-        );
+
+            $placeholders['%' . $key . '%'] = $value;
+            unset($placeholders[$key]);
+        }
 
         return strtr(
             $word,
-            array_combine($keys, $placeholders)
+            $placeholders
         );
     }
 
