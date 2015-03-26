@@ -12,9 +12,10 @@
 namespace Moss\Locale\Translator;
 
 /**
- * Translators Dictionary Interface
+ * Dictionary interface
  *
- * @package Moss\Locale
+ * @package Moss Router
+ * @author  Michal Wachowski <wachowski.michal@gmail.com>
  */
 interface DictionaryInterface
 {
@@ -23,35 +24,24 @@ interface DictionaryInterface
      *
      * @return string
      */
-    public function getLanguage();
+    public function getLocale();
 
     /**
-     * Sets locale
-     *
-     * @param string $locale
-     *
-     * @return $this
-     */
-    public function setLanguage($locale);
-
-    /**
-     * Returns Translator for set word or if missing - word
+     * Returns translation as associative array
      *
      * @param string $word
-     *
      * @return string
      */
-    public function getWord($word);
+    public function getText($word);
 
     /**
      * Adds new or updates entry to dictionary
      *
-     * @param string      $word
-     * @param string      $translation
-     *
+     * @param string $word
+     * @param string $text
      * @return $this
      */
-    public function setWord($word, $translation);
+    public function setText($word, $text);
 
     /**
      * Gets Translators from reader
@@ -64,7 +54,6 @@ interface DictionaryInterface
      * Set Translators to writer
      *
      * @param array $translations
-     *
      * @return $this
      */
     public function setTranslations(array $translations);

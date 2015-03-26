@@ -1,7 +1,0 @@
-# Moss Locale
-
-Simple & basic locale thing.
-For now only supports translations.
-
-	$translator = new Translator();
-	$translator->trans('Some %
