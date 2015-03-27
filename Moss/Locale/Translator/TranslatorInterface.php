@@ -34,7 +34,7 @@ interface TranslatorInterface
      *
      * @return string
      */
-    public function translate($word, array $placeholders = []);
+    public function trans($word, array $placeholders = []);
 
     /**
      * Returns plural localized message
@@ -48,7 +48,7 @@ interface TranslatorInterface
      *
      * @return string
      */
-    public function translatePlural($word, $count, array $placeholders = []);
+    public function transChoice($word, $count, array $placeholders = []);
 
     /**
      * Returns dictionary instance
