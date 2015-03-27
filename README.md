@@ -54,7 +54,7 @@ Eg. EN to DE:
 ```
 
 ```php
-	echo $translator->translate('There be %placeholder%', ['placeholder' => 'Drachen'])
+	echo $translator->trans('There be %placeholder%', ['placeholder' => 'Drachen'])
 	// prints dort Drachen
 ```
 
@@ -76,7 +76,7 @@ Intervals follow ISO 31-11 notation:
 ```
 
 ```php
-	echo $translator->translatePlural('apple.count', $count)
+	echo $translator->transChoice('apple.count', $count)
 	// prints There are no apples when $count = 0
 	// prints There is one apple when $count = 1
 	// prints There are %count% apples when $count > 1 && $count >= 19

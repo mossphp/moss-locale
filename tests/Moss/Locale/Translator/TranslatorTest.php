@@ -30,7 +30,7 @@ class TranslatorTest extends \PHPUnit_Framework_TestCase
         $dictionary = $this->getMock('\Moss\Locale\Translator\DictionaryInterface');
 
         $translator = new Translator('en_US', $dictionary, true);
-        $this->assertEquals('foo', $translator->translate('foo'));
+        $this->assertEquals('foo', $translator->trans('foo'));
     }
 
     /**
@@ -42,7 +42,7 @@ class TranslatorTest extends \PHPUnit_Framework_TestCase
         $dictionary = $this->getMock('\Moss\Locale\Translator\DictionaryInterface');
 
         $translator = new Translator('en_US', $dictionary, false);
-        $translator->translate('foo');
+        $translator->trans('foo');
     }
 
     /**
@@ -54,7 +54,7 @@ class TranslatorTest extends \PHPUnit_Framework_TestCase
         $dictionary->expects($this->any())->method('getText')->with($key)->will($this->returnValue($val));
 
         $translator = new Translator('en_US', $dictionary);
-        $this->assertEquals($val, $translator->translate($key));
+        $this->assertEquals($val, $translator->trans($key));
     }
 
     public function dictionaryProvider()
@@ -76,7 +76,7 @@ class TranslatorTest extends \PHPUnit_Framework_TestCase
         $dictionary->expects($this->any())->method('getText')->will($this->returnValue($word));
 
         $translator = new Translator('en_US', $dictionary);
-        $this->assertEquals($expected, $translator->translate($word, $placeholders));
+        $this->assertEquals($expected, $translator->trans($word, $placeholders));
     }
 
     public function placeholderProvider()
@@ -105,7 +105,7 @@ class TranslatorTest extends \PHPUnit_Framework_TestCase
         $dictionary = $this->getMock('\Moss\Locale\Translator\DictionaryInterface');
 
         $translator = new Translator('en_US', $dictionary, true);
-        $this->assertEquals('foo', $translator->translatePlural('foo', 1));
+        $this->assertEquals('foo', $translator->transChoice('foo', 1));
     }
 
     /**
@@ -117,7 +117,7 @@ class TranslatorTest extends \PHPUnit_Framework_TestCase
         $dictionary = $this->getMock('\Moss\Locale\Translator\DictionaryInterface');
 
         $translator = new Translator('en_US', $dictionary, false);
-        $translator->translatePlural('foo', 1);
+        $translator->transChoice('foo', 1);
     }
 
     /**
@@ -131,7 +131,7 @@ class TranslatorTest extends \PHPUnit_Framework_TestCase
         $dictionary->expects($this->any())->method('getText')->will($this->returnValue($word));
 
         $translator = new Translator('en_US', $dictionary);
-        $result = $translator->translatePlural($word, $num, ['name' => 'Foo']);
+        $result = $translator->transChoice($word, $num, ['name' => 'Foo']);
 
         $this->assertEquals($expected, $result);
     }
