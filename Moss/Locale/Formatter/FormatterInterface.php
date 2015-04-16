@@ -24,6 +24,7 @@ interface FormatterInterface
      * Formats number according to set locale
      *
      * @param float $number
+     *
      * @return string
      */
     public function formatNumber($number);
@@ -32,6 +33,7 @@ interface FormatterInterface
      * Formats currency according to set locale
      *
      * @param int $amount
+     *
      * @return string
      */
     public function formatCurrency($amount);
@@ -39,24 +41,27 @@ interface FormatterInterface
     /**
      * Formats time according to set locale
      *
-     * @param \DateTime $datetime
+     * @param mixed $time
+     *
      * @return string
      */
-    public function formatTime(\DateTime $datetime);
+    public function formatTime($time = null);
 
     /**
      * Formats date according to set locale
      *
-     * @param \DateTime $datetime
+     * @param mixed $date
+     *
      * @return string
      */
-    public function formatDate(\DateTime $datetime);
+    public function formatDate($date = null);
 
     /**
      * Formats date time according to set locale
      *
-     * @param \DateTime $datetime
+     * @param mixed $datetime
+     *
      * @return string
      */
-    public function formatDateTime(\DateTime $datetime);
+    public function formatDateTime($datetime = null);
 }

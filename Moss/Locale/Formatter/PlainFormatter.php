@@ -54,7 +54,6 @@ class PlainFormatter implements FormatterInterface
      * Numeric pattern example #,##0.###
      * Currency pattern example $#,##0.##
      * Time, date and date time use same pattern as date().
-     *
      * Pattern names: number, currency, time, date, dateTome
      *
      * @param string $formatter
@@ -167,36 +166,59 @@ class PlainFormatter implements FormatterInterface
     /**
      * Formats time according to set locale
      *
-     * @param \DateTime $datetime
+     * @param mixed $time
      *
      * @return string
      */
-    public function formatTime(\DateTime $datetime)
+    public function formatTime($time = null)
     {
-        return $datetime->format($this->timePattern);
+        return $this->convertToDateTime($time, $this->timePattern);
     }
 
     /**
      * Formats date according to set locale
      *
-     * @param \DateTime $datetime
+     * @param mixed $date
      *
      * @return string
      */
-    public function formatDate(\DateTime $datetime)
+    public function formatDate($date = null)
     {
-        return $datetime->format($this->datePattern);
+        return $this->convertToDateTime($date, $this->datePattern);
     }
 
     /**
      * Formats date time according to set locale
      *
-     * @param \DateTime $datetime
+     * @param mixed $datetime
      *
      * @return string
      */
-    public function formatDateTime(\DateTime $datetime)
+    public function formatDateTime($datetime = null)
     {
-        return $datetime->format($this->datetimePattern);
+        return $this->convertToDateTime($datetime, $this->datetimePattern);
+    }
+
+    /**
+     * @param mixed  $datetime
+     * @param string $format
+     *
+     * @return null|string
+     */
+    protected function convertToDateTime($datetime, $format)
+    {
+        if (empty($datetime)) {
+            return null;
+        }
+
+        try {
+            if (!is_object($datetime) || !$datetime instanceof \DateTime) {
+                $datetime = new \DateTime((string) $datetime);
+            }
+
+            return $datetime->format($format);
+        } catch (\Exception $e) {
+            return null;
+        }
     }
 }

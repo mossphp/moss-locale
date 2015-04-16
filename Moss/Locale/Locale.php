@@ -22,6 +22,40 @@ class Locale implements LocaleInterface
     protected $locale;
     protected $currencySubUnit = 100;
 
+    protected static $locales = [
+        'az' => 'az_AZ',
+        'bg' => 'bg_BG',
+        'de' => 'de_DE',
+        'en' => 'en_US',
+        'es' => 'es_ES',
+        'fi' => 'fi_FI',
+        'fo' => 'fo_FO',
+        'fr' => 'fr_FR',
+        'hr' => 'hr_HR',
+        'ht' => 'ht_HT',
+        'hu' => 'hu_HU',
+        'id' => 'id_ID',
+        'is' => 'is_IS',
+        'it' => 'it_IT',
+        'lt' => 'lt_LT',
+        'lv' => 'lv_LV',
+        'mg' => 'mg_MG',
+        'mk' => 'mk_MK',
+        'mn' => 'mn_MN',
+        'mt' => 'mt_MT',
+        'nl' => 'nl_NL',
+        'pl' => 'pl_PL',
+        'pt' => 'pt_PT',
+        'ro' => 'ro_RO',
+        'ru' => 'ru_RU',
+        'rw' => 'rw_RW',
+        'sk' => 'sk_SK',
+        'so' => 'so_SO',
+        'th' => 'th_TH',
+        'tr' => 'tr_TR',
+        'uz' => 'uz_UZ',
+    ];
+
     /**
      * @param string $locale
      * @param string $timezone
@@ -35,7 +69,26 @@ class Locale implements LocaleInterface
     }
 
     /**
+     * Creates instance based on language
+     *
+     * @param string $lang
+     *
+     * @return Locale
+     * @throws LocaleException
+     */
+    public function constructFromLang($lang)
+    {
+        if (!isset(static::$locales, $lang)) {
+            throw new LocaleException('Unable to create locale for language ' . $lang);
+        }
+
+        return new self(static::$locales[$lang]);
+    }
+
+    /**
      * Returns locale name
+     *
+     * @param string $locale
      *
      * @return string
      * @throws \Moss\Locale\LocaleException

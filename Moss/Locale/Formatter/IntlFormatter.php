@@ -102,49 +102,49 @@ class IntlFormatter implements FormatterInterface
     /**
      * Formats time according to set locale
      *
-     * @param \DateTime $datetime
+     * @param mixed $time
      *
      * @return string
      */
-    public function formatTime(\DateTime $datetime)
+    public function formatTime($time = null)
     {
         if (!$this->timeFormatter) {
             $this->timeFormatter = $this->getIntlDateFormatter(\IntlDateFormatter::NONE, \IntlDateFormatter::SHORT);
         }
 
-        return $this->timeFormatter->format($datetime);
+        return $this->convertToDateTime($time, $this->timeFormatter);
     }
 
     /**
      * Formats date according to set locale
      *
-     * @param \DateTime $datetime
+     * @param mixed $date
      *
      * @return string
      */
-    public function formatDate(\DateTime $datetime)
+    public function formatDate($date = null)
     {
         if (!$this->dateFormatter) {
             $this->dateFormatter = $this->getIntlDateFormatter(\IntlDateFormatter::SHORT, \IntlDateFormatter::NONE);
         }
 
-        return $this->dateFormatter->format($datetime);
+        return $this->convertToDateTime($date, $this->dateFormatter);
     }
 
     /**
      * Formats date time according to set locale
      *
-     * @param \DateTime $datetime
+     * @param mixed $datetime
      *
      * @return string
      */
-    public function formatDateTime(\DateTime $datetime)
+    public function formatDateTime($datetime = null)
     {
         if (!$this->datetimeFormatter) {
             $this->datetimeFormatter = $this->getIntlDateFormatter(\IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT);
         }
 
-        return $this->datetimeFormatter->format($datetime);
+        return $this->convertToDateTime($datetime, $this->datetimeFormatter);
     }
 
     /**
@@ -163,5 +163,28 @@ class IntlFormatter implements FormatterInterface
             $timeType,
             $this->timezone
         );
+    }
+
+    /**
+     * @param mixed              $datetime
+     * @param \IntlDateFormatter $formatter
+     *
+     * @return null|string
+     */
+    protected function convertToDateTime($datetime, \IntlDateFormatter $formatter)
+    {
+        if (empty($datetime)) {
+            return null;
+        }
+
+        try {
+            if (!is_object($datetime) || !$datetime instanceof \DateTime) {
+                $datetime = new \DateTime((string) $datetime);
+            }
+
+            return $formatter->format($datetime);
+        } catch (\Exception $e) {
+            return null;
+        }
     }
 }

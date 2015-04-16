@@ -123,4 +123,31 @@ class PlainFormatterTest extends \PHPUnit_Framework_TestCase
             ['Y-m-d H:i:s', '2015-03-05 13:01:00']
         ];
     }
+
+    /**
+     * @dataProvider formatProvider
+     */
+    public function testFormats($format)
+    {
+        $formatter = new PlainFormatter('en_US', 100, 'UTC');
+
+        $this->assertEquals(
+            empty($format) ? null : $formatter->formatDateTime(new \DateTime($format)),
+            $formatter->formatDateTime($format)
+        );
+    }
+
+    public function formatProvider()
+    {
+        return [
+            [null],
+            [''],
+            ['2015-04-16'],
+            ['10:22:10'],
+            ['2015-04-16 10:22:10'],
+            ['yesterday'],
+            ['now'],
+            ['tomorrow + 1 day'],
+        ];
+    }
 }

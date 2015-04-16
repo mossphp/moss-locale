@@ -59,4 +59,31 @@ class IntlFormatterTest extends \PHPUnit_Framework_TestCase
         $formatter = new IntlFormatter('en_US', 100, 'UTC');
         $this->assertRegExp('/^3\/5\/15,? 1:01 PM$/', $formatter->formatDateTime($date));
     }
+
+    /**
+     * @dataProvider formatProvider
+     */
+    public function testFormats($format)
+    {
+        $formatter = new IntlFormatter('en_US', 100, 'UTC');
+
+        $this->assertEquals(
+            empty($format) ? null : $formatter->formatDateTime(new \DateTime($format)),
+            $formatter->formatDateTime($format)
+        );
+    }
+
+    public function formatProvider()
+    {
+        return [
+            [null],
+            [''],
+            ['2015-04-16'],
+            ['10:22:10'],
+            ['2015-04-16 10:22:10'],
+            ['yesterday'],
+            ['now'],
+            ['tomorrow + 1 day'],
+        ];
+    }
 }
